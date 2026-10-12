@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val SITE_URL: String = BuildConfig.SITE_URL
-        const val VERSION = "1.0.10"
+        const val VERSION = "1.0.11"
         /** 来电接听等场景的站内深链（必须以 SITE_URL 开头，否则忽略） */
         const val EXTRA_OPEN_URL = "open_url"
         /** 外部 App（如桌宠）唤起本壳用的自定义 scheme：floatshell://open?url=<站内地址> */
@@ -284,6 +284,18 @@ class MainActivity : AppCompatActivity() {
             databaseEnabled = true
             mediaPlaybackRequiresUserGesture = false
             allowFileAccess = false
+            // 让 WebView 认页面里的 <meta name="viewport" width=device-width>。
+            // 不开这两项时，WebView 忽略 meta viewport，改按约 980 CSS px 的「桌面宽度」
+            // 布局页面，再把整页缩到屏幕宽——网页写在 @media (max-width:500px) 里的
+            // 全屏适配永远不会命中，用户看到的是「屏幕中间一个缩小版手机 + 四周大片留白」。
+            // Chrome 默认按 device-width 布局，所以同一站点网页版正常、壳内异常。
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            // 不跟随系统字体大小缩放页面文字，避免系统设了「大字体」时整页被撑破
+            textZoom = 100
+            // 页面自己带 user-scalable=no：关掉 WebView 内置缩放，避免手势与页面冲突
+            builtInZoomControls = false
+            setSupportZoom(false)
             userAgentString = "$userAgentString FloatShell/$VERSION"
         }
         CookieManager.getInstance().setAcceptCookie(true)
