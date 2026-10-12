@@ -26,8 +26,12 @@ android {
         // 1.0.10：浮窗改圆角矩形；浮窗左上角显示「待发 N」角标。
         // 1.0.11：截屏与主动查岗（含查岗浮层回复框）；通知栏「直接回复」。
         // 1.0.12：截屏可选收件人；位置感知；睡眠（Health Connect）。
-        versionCode 11
-        versionName "1.0.12"
+        // 1.0.13：WebView 开启 useWideViewPort / loadWithOverviewMode，修壳内整页被
+        //         按 980px 桌面宽度布局再缩放（界面缩在屏幕中间、四周留白）。
+        //         versionCode 一起 +1：系统「应用信息」里的版本号能直接区分新旧包，
+        //         不必再靠 chrome://inspect 看 UA 才能确认装没装上。
+        versionCode 12
+        versionName "1.0.13"
         buildConfigField "String", "SITE_URL", "\"${siteUrl}\""
     }
 

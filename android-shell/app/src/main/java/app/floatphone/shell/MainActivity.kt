@@ -55,7 +55,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val SITE_URL: String = BuildConfig.SITE_URL
-        const val VERSION = "1.0.11"
+        /** 与 build.gradle 的 versionName 保持一致：UA 里的 FloatShell/<版本> 靠它，
+         *  系统「应用信息」里显示的是 versionName，两者不同步时排查会互相打架。 */
+        const val VERSION = "1.0.13"
         /** 来电接听等场景的站内深链（必须以 SITE_URL 开头，否则忽略） */
         const val EXTRA_OPEN_URL = "open_url"
         /** 外部 App（如桌宠）唤起本壳用的自定义 scheme：floatshell://open?url=<站内地址> */
@@ -326,6 +328,28 @@ class MainActivity : AppCompatActivity() {
                 return runCatching {
                     startActivity(Intent(Intent.ACTION_VIEW, url)); true
                 }.getOrDefault(true)
+            }
+
+            /**
+             * 视口自检：页面加载完成后读一次 window.innerWidth。
+             *
+             * 正常铺满时它约等于屏幕宽（360~420），此时**完全静默**；只有 WebView 仍按
+             * 桌面宽度（约 980）布局、页面被整体缩小时才弹一次提示。这样不用连电脑看
+             * chrome://inspect，一眼就能确认「铺满没铺满」；修好之后它不会再出现，
+             * 也不必专门再发一版把它删掉。
+             */
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                view.evaluateJavascript("window.innerWidth") { value ->
+                    val width = value?.trim('"')?.toDoubleOrNull() ?: return@evaluateJavascript
+                    if (width > 600) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "壳内视口宽度 ${width.toInt()}px：仍是桌面布局（正常应约等于屏幕宽）",
+                            Toast.LENGTH_LONG,
+                        ).show()
+                    }
+                }
             }
         }
 
